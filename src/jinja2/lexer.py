@@ -553,7 +553,7 @@ class Lexer:
             ],
             # line statements
             TOKEN_LINESTATEMENT_BEGIN: [
-                (c(r"\s*(\n|$)"), TOKEN_LINESTATEMENT_END, "#pop")
+                (c(r"\s*?(\n|$)"), TOKEN_LINESTATEMENT_END, "#pop")
             ]
             + tag_rules,
             # line comments

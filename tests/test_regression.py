@@ -618,3 +618,21 @@ class TestBug:
         from jinja2.runtime import ChainableUndefined
 
         assert str(Markup(ChainableUndefined())) == ""
+
+    @pytest.mark.parametrize(
+        ("extra_newlines_before", "extra_newlines_after"),
+        [("\n", ""), ("", "\n"), ("\n", "\n")],
+    )
+    def test_newlines_around_line_blocks(
+        self, env: Environment, extra_newlines_before, extra_newlines_after
+    ):
+        env.line_statement_prefix = "%%"
+        tmpl = env.from_string(
+            f"""\
+%% for item in seq
+{extra_newlines_before}{{{{item}}}}{extra_newlines_after}
+%% endfor"""
+        )
+        assert tmpl.render(seq=range(3)) == "{b}0{a}\n{b}1{a}\n{b}2{a}\n".format(
+            b=extra_newlines_before, a=extra_newlines_after
+        )
