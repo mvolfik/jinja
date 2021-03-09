@@ -181,7 +181,7 @@ class TestBug:
 # else
 #   print 'D'
 # endif
-    """
+"""
         )
         assert t.render(a=0, b=False, c=42, d=42.0) == "1111C"
 
