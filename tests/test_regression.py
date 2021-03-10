@@ -618,3 +618,44 @@ class TestBug:
         from jinja2.runtime import ChainableUndefined
 
         assert str(Markup(ChainableUndefined())) == ""
+
+    @pytest.mark.parametrize("extra_newlines_before", [0, 1])
+    @pytest.mark.parametrize("extra_newlines_after", [0, 1])
+    @pytest.mark.parametrize("markup_before_comment", ["markup ", ""])
+    @pytest.mark.parametrize("mark_collapse_comment", ["-", "", "+"])
+    @pytest.mark.parametrize("trim_blocks", [True, False])
+    def test_comment_collapsing(  # pallets#204
+        self,
+        env: Environment,
+        extra_newlines_before,
+        extra_newlines_after,
+        markup_before_comment,
+        mark_collapse_comment,
+        trim_blocks,
+    ):
+        env.line_comment_prefix = "##"
+        env.trim_blocks = trim_blocks
+
+        template_str = (
+            "markup\n"
+            + "\n" * extra_newlines_before
+            + markup_before_comment
+            + "##"
+            + mark_collapse_comment
+            + " comment text"
+            + "\n" * extra_newlines_after
+            + "\nmarkup"
+        )
+
+        output = env.from_string(template_str).render()
+
+        should_collapse_comment = not markup_before_comment and (
+            mark_collapse_comment == "-"
+            or (trim_blocks and mark_collapse_comment != "+")
+        )
+        assert (
+            len(output.splitlines())
+            == (2 if should_collapse_comment else 3)
+            + extra_newlines_before
+            + extra_newlines_after
+        ), f"Template {template_str!r} was rendered as {output!r}"
